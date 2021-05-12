@@ -48,6 +48,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
         // Restart the headless service.
         [self startLocatorService:[PreferencesManager getCallbackDispatcherHandle]];
         observingRegions = YES;
+        [self setServiceRunning:true];
     } else {
         if(observingRegions == YES) {
             [self prepareLocationManager];
@@ -62,7 +63,9 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 }
 
 -(void)applicationWillTerminate:(UIApplication *)application {
-    [self observeRegionForLocation:_lastLocation];
+    if([self isServiceRunning]) {
+        [self observeRegionForLocation:_lastLocation];
+    }
 }
 
 - (void) observeRegionForLocation:(CLLocation *)location {
@@ -210,6 +213,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                              kArgDisposeCallback : @([PreferencesManager getCallbackHandle:kDisposeCallbackKey])
                              };
             [_callbackChannel invokeMethod:kBCMDispose arguments:map];
+            [_locationManager stopMonitoringSignificantLocationChanges];
         }
     }
 }
